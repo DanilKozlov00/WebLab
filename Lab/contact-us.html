@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Чат-бот</title>
+        
+<!--
+convForm - плагин, превращающий форму в интерактивный чат.
+Что можно сделать:
+
+- преобразовать ввод, выбор опций в вопросы в интерактивном чате
+- использовать шаблоны регулярных выражений
+- выбрать случайный вопрос из вариантов
+- разветвлять разговор на основе ответа
+- получить доступ к предыдущим ответам для использования их в вопросах
+- использовать сообщения, которые не требуют ответа
+- динамически создавать новые вопросы
+    
+-->
+    
+    <meta charset="UTF-8">	
+	<link rel="stylesheet" type="text/css" href="dist/jquery.convform.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+	<section id="demo">
+	    <div class="vertical-align">
+	        <div class="container">
+	            <div class="row">
+	                <div class="col-sm-6 col-sm-offset-3 col-xs-offset-0">
+	                    <div class="card">
+<!--
+                            Обычная форма помещается во внешний элемент (класс conv-form-wrapper),
+                            и получается чат.-->                            
+                            
+	                        <div id="chat" class="conv-form-wrapper">
+	                            <form action="" method="GET" class="hidden">
+                                    
+<!--                                Чтобы плагин знал, какой вопрос задавать,
+                                    каждый input и select
+                                    должны иметь атрибут data-conv-question.      
+                                    В значение атрибута пишется вопрос.-->      
+                                    
+	                                <select data-conv-question="Здравствуйте я чат-бот Алиса, я могу вам чем то помочь?" name="first-question">
+	                                    <option value="yes">Да</option>
+	                                    <option value="sure">Да, иначе зачем я сюда зашел</option>
+	                                </select>
+                                    
+<!--                                Если хотите, вы можете написать более одного вопроса
+                                    для каждого тега, используя символ | между ними. 
+                                    Плагин случайным образом выбирает вопрос, который 
+                                    будет использоваться при генерации фразы.-->
+                                    
+
+					
+	                                <select name="human" data-callback="storeState" data-conv-question="Позвать человека?">
+	                                    <option value="yes">Да</option>
+	                                    <option value="no">Нет</option>
+	                                </select>
+	                               
+					<div data-conv-fork="human">
+	                                    <div data-conv-case="no">
+	                                        <input type="text" data-conv-question="Хорошо!" data-no-answer="true">
+	                                    </div>
+	                                    <div data-conv-case="yes">
+                                            	<input type="text" data-conv-question="Здравствуйте, я консультант Олег!" data-no-answer="true">
+	                                    </div>
+	                                </div>
+                                    
+					<input type="text" name="what_name" data-conv-question="Опишите свою проблему.">                                    
+
+<!--                                Чтобы позже использовать ответы пользователя на вопросы, 
+                                    вы можете использовать {name} внутри тега data-conv-question, 
+                                    где {name} ссылается на имя вопроса, на который вам нужен ответ.
+                                    Можно получить конкретные слова из ответа, используя
+                                    селектор (:0). Например, если вам нужно имя пользователя, вы можете
+                                    использовать {what_name}: 0, и плагин получит первое
+                                    слово из ответа на вопрос «what_name».-->                                        
+<!--
+                                    Вы можете также создавать сообщения, на которые не ожидается
+                                    ответа от пользователя, чтобы плагин сразу перешел
+                                    к следующему вопросу. Для этого поместите атрибут
+                                    data-no-answer = "true" во входной тег.
+-->                                    
+	                                <input type="text" data-conv-question="Ваша заявка, {what_name}, принята" data-no-answer="true">    
+
+					<input type="text" name="problem" data-conv-question="Мы постараемся решить вашу проблему как можно быстрее | Вы первый в очереди, поэтому ответ на вашу заявку будет рассмотрен в течении 5 мин." data-no-answer="true">                               
+                                                                                 
+<!--
+                                    Можно разветвить диалог и задать конкретные вопросы
+                                    на основе ответа пользователя. 
+                                    Для этого после вашего вопроса нужно поместить тег div, 
+                                    внутри которого указать атрибут data-conv-fork. 
+                                    Значение этого атрибута должно совпадать с именем вопроса.
+                                    Внутри этого div-а вам нужно создать теги div 
+                                    с атрибутом data-conv-case, ссылающимся на ответ, 
+                                    который будет разветвлять диалог.           
+-->
+<!--                                Атрибут data-callback="storeState" нужен,
+                                    чтобы позже можно было вернуться к этому месту диалога.
+                                    Ниже описано подробнее.
+-->
+                                    
+                                    
+<!--
+                                    Можно использовать регулярные выражения для входных данных.
+                                    Используйте атрибут data-pattern в теге.
+                                    Когда пользователь вводит ответ, если он не соответствует шаблону,
+                                    он не может его отправить, и цвет ввода становится красным.
+-->
+	                                <input data-conv-question="Мы направим ответ на ваш адрес электронной почты, укажите его:" data-pattern="^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$" id="email" type="email" name="email" required placeholder="What's your e-mail?">
+                                    
+                                    
+<!--
+                                    Можно отображать сообщение пользователя за "звездочками", как пароль.
+                                    Для этого используется атрибут type со значением password
+-->
+	                                <input data-conv-question="Придумайте номер заявки, что бы в случае проблем вы могли обратиться снова" type="password" name="password">
+                                    
+                                
+<!--
+                                    Вы можете использовать настраиваемые функции, которые
+                                    будут вызываться, когда пользователь нажимает на ответ в выбранном списке.
+                                    Для этого поместите имя вызываемой функции в атрибут data-callback.
+                                    js-функции вы можете посмотреть ниже.
+-->
+									<select data-conv-question="У вас остались вопросы? Я мог бы перенаправить вас на раздел сайта, где вы нашли бы ответ. Но сайт кривой, поэтому гуглите сами:">
+											<option value="ggl" data-callback="google">Google</option>
+											<option value="ya" data-callback="yandex">Яндекс</option>
+									</select>                                    
+                                    
+<!--
+                                    data-callback может также "зациклить" диалог, 
+                                    вернув диалог на заданный вопрос.
+                                    js-функции "rollback" и "restore" вы можете посмотреть ниже.
+-->
+	                                <select name="callbackTest" data-conv-question="У вас еще остались вопросы?">
+	                                    <option value="yes" data-callback="rollback">Да</option>
+	                                    <option value="no" data-callback="restore">Нет</option>
+	                                </select>
+                                    
+	                                <select data-conv-question="Спасибо за использование бота!" id="">
+	                                    <option value="">:)</option>
+	                                </select>
+	                            </form>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</section>
+	<script type="text/javascript" src="jquery-1.12.3.min.js"></script>
+	<script type="text/javascript" src="dist/autosize.min.js"></script>
+	<script type="text/javascript" src="dist/jquery.convform.js"></script>
+
+	<script>
+//        Функции для перенаправления на страницы Google и Yandex
+		function google(stateWrapper, ready) {
+			window.open("https://google.com");
+			ready();
+		}
+		function yandex(stateWrapper, ready) {
+			window.open("https://yandex.ru");
+			ready();
+		}
+        
+        
+//        Функции для возврата к определенному месту диалога
+		var rollbackTo = false;
+		var originalState = false;
+        
+		function storeState(stateWrapper, ready) {
+			rollbackTo = stateWrapper.current;
+			console.log("storeState called: ",rollbackTo);
+			ready();
+		}
+            
+        
+		function rollback(stateWrapper, ready) {
+			console.log("rollback called: ", rollbackTo, originalState);
+			console.log("answers at the time of user input: ", stateWrapper.answers);
+			if(rollbackTo!=false) {
+				if(originalState==false) {
+					originalState = stateWrapper.current.next;
+						console.log('stored original state');
+				}
+				stateWrapper.current.next = rollbackTo;
+				console.log('changed current.next to rollbackTo');
+			}
+			ready();
+		}
+		function restore(stateWrapper, ready) {
+			if(originalState != false) {
+				stateWrapper.current.next = originalState;
+				console.log('changed current.next to originalState');
+			}
+			ready();
+		}
+	</script>
+    
+    
+	<script>
+		jQuery(function($){
+			convForm = $('#chat').convform({selectInputStyle: 'disable'});
+			console.log(convForm);
+		});
+	</script>
+    
+    
+    
+</body>
+</html>
